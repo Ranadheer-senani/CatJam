@@ -1,5 +1,8 @@
 import React,{useRef,useState} from 'react';
+import { getAnalytics, logEvent } from "firebase/analytics";
 import './App.css';
+import { Box, Flex, Input, IconButton, Button, CircularProgress, CircularProgressLabel } from '@chakra-ui/react'
+import {SearchIcon} from "@chakra-ui/icons"
 
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
@@ -23,20 +26,30 @@ const auth = firebase.auth();
 const firestore = firebase.firestore();
 const analytics = firebase.analytics();
 
+  var videoId = 'B-pNp0LUV2Y';
+
+
 function App() {
 
   const [user] = useAuthState(auth);
 
   return (
-    <div className="App">
+    <Box className="App" bg='#282c34' color='white'>
       <header className="App-header">
         <h1>CatJam 😺📻</h1>
+        <br></br>
+        <Flex align = 'center' justify={'center'}>
+          <CircularProgress value={40} >
+            <CircularProgressLabel>`${videoId}`</CircularProgressLabel>
+          </CircularProgress>
+        </Flex>
+        <br></br>
         <SignOut />
       </header>
       <section>
         {user ? <Queue />:<SignIn />}
       </section>
-    </div>
+    </Box>
   );
 }
 
@@ -49,14 +62,14 @@ function SignIn() {
 
   return (
     <>
-    <button className='sign-in' onClick={signInWithGoogle}>Sign in with Google!</button>
+    <Button colorScheme={'cyan'} className='sign-in' onClick={signInWithGoogle}>Sign in with Google!</Button>
     </>
   )
 }
 
 function SignOut(){
   return auth.currentUser && (
-    <button className='sign-out' onClick={() => auth.signOut()}>Sign Out</button>
+    <Button colorScheme={'cyan'} className='sign-out' onClick={() => auth.signOut()}>Sign Out</Button>
   )
 }
 
@@ -84,7 +97,6 @@ function Queue(){
     setFormValue('');
     dummy.current.scrollIntoView({ behaviour: 'smooth'});
   }
-  var videoId = 'B-pNp0LUV2Y';
 
   return (<>
   <main>
@@ -103,8 +115,8 @@ function Queue(){
   </main>
 
   <form onSubmit={sendMessage}>
-    <input value={formValue} onChange={(e) => setFormValue(e.target.value)} placeholder="Add a Song"/>
-    <button type = "submit" disabled = {!formValue}>🎷</button>
+    <Input value={formValue} width='auto' onChange={(e) => setFormValue(e.target.value)} placeholder="Add a Song"/>
+    <IconButton colorScheme='cyan' aria-label = "submit" icon={<SearchIcon className="SearchIcon"/>} disabled = {!formValue}/>
   </form>
   </>
   )
@@ -115,7 +127,7 @@ function QueueSong(props){
   videoId = text;
   console.log(videoId);
   return (<>
-  <div className={`message ${songClass}`}>
+  <div className={`message ${songClass}`} >
     <p>{displayName}</p>
     <p>{text}</p>
   </div>
@@ -124,5 +136,7 @@ function QueueSong(props){
   )
 }
 }
+
+logEvent(analytics, 'notification_received');
 
 export default App;
