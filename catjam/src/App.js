@@ -1,7 +1,7 @@
 import React,{useRef,useState} from 'react';
 import { getAnalytics, logEvent } from "firebase/analytics";
 import './App.css';
-import { Box, Flex, Input, IconButton, Button, CircularProgress, CircularProgressLabel } from '@chakra-ui/react'
+import { Box, Flex, Input, IconButton, Button, Center, Spacer, CircularProgress, CircularProgressLabel, Avatar, Text, Badge } from '@chakra-ui/react';
 import {SearchIcon} from "@chakra-ui/icons"
 
 import firebase from 'firebase/compat/app';
@@ -39,9 +39,10 @@ function App() {
         <h1>CatJam 😺📻</h1>
         <br></br>
         <Flex align = 'center' justify={'center'}>
-          <CircularProgress value={40} >
+          {/* <CircularProgress value={40} >
             <CircularProgressLabel>`${videoId}`</CircularProgressLabel>
-          </CircularProgress>
+          </CircularProgress> */}
+          playing: {videoId}
         </Flex>
         <br></br>
         <SignOut />
@@ -85,13 +86,14 @@ function Queue(){
   const sendMessage = async (e) => {
     e.preventDefault();
 
-    const { uid, displayName } = auth.currentUser;
+    const { uid, displayName, photoURL } = auth.currentUser;
 
     await playlistRef.add({
       text:formValue,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       uid,
-      displayName
+      displayName,
+      photoURL
     })
 
     setFormValue('');
@@ -103,36 +105,52 @@ function Queue(){
     {playlist && playlist.map(msg => <QueueSong key={msg.id} message = {msg}/>)}
 
     <span ref = {dummy}></span>
-    <bod>
-    <iframe id="player"
-      type="text/html"
-      width="60"
-      height="30" 
-      src={`http://www.youtube.com/embed/${videoId}?enablejsapi=1&origin=http://example.com`} 
-      frameborder="0">
-     </iframe>
-    </bod>
+      <Center>
+        <iframe id="player"
+          type="text/html"
+          width="60px"
+          height="30px" 
+          src={`http://www.youtube.com/embed/${videoId}?enablejsapi=1&origin=http://example.com`} 
+          frameborder="0">
+        </iframe>
+        </ Center>
   </main>
 
   <form onSubmit={sendMessage}>
     <Input value={formValue} width='auto' onChange={(e) => setFormValue(e.target.value)} placeholder="Add a Song"/>
-    <IconButton colorScheme='cyan' aria-label = "submit" icon={<SearchIcon className="SearchIcon"/>} disabled = {!formValue}/>
+    <IconButton colorScheme="cyan" aria-label = "submit" icon={<SearchIcon className="SearchIcon"/>} disabled = {!formValue}/>
   </form>
   </>
   )
 function QueueSong(props){
-  const { text, uid, displayName} = props.message;
+  const { text, uid, displayName, photoURL} = props.message;
   
   const songClass = uid === auth.currentUser.uid ? "sent" : "received";
   videoId = text;
   console.log(videoId);
   return (<>
-  <div className={`message ${songClass}`} >
+  {/* <div className={`message ${songClass}`} >
     <p>{displayName}</p>
     <p>{text}</p>
   </div>
-  </>
-
+  </> */}
+  <Spacer/>
+  <Flex> {/* align="center" justify="center"*/}
+  <Center mr='30%'>
+   
+    <Avatar src={photoURL} />
+    <Box ml='3' mb='4'>
+      <Text fontWeight='bold'>
+        {displayName}
+        <Badge ml='1' colorScheme='pink'>
+          New
+        </Badge>
+      </Text>
+      <Text fontSize='sm'>{videoId}</Text>
+    </Box>
+    </Center>
+  </Flex>
+</>
   )
 }
 }
